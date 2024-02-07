@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"io"
 	"math/rand"
 	"net/http"
 )
@@ -17,17 +18,29 @@ func handleURLShortening(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url := r.FormValue("url")
+	// Чтение данных из тела запроса
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Unable to read request body", http.StatusInternalServerError)
+		return
+	}
+
+	// Вывод содержимого тела запроса в консоль
+	// fmt.Println("Request body:", string(body))
 
 	// Генерация произвольной комбинации символов (можно использовать более сложный алгоритм)
 	shortenedURL := "http://localhost:8080/" + generateRandomString(8)
 
 	// Добавление записи в карту
-	urlMap[shortenedURL] = url
+	urlMap[shortenedURL] = string(body)
 
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintf(w, shortenedURL)
+	_, err = fmt.Fprintf(w, shortenedURL)
+	if err != nil {
+		return
+	}
+
 }
 
 func handleRedirect(w http.ResponseWriter, r *http.Request) {
@@ -67,5 +80,8 @@ func main() {
 	r.HandleFunc("/{variable}", handleRedirect)
 
 	fmt.Println("Server is running on http://localhost:8080")
-	http.ListenAndServe(":8080", r)
+	err := http.ListenAndServe(":8080", r)
+	if err != nil {
+		return
+	}
 }
