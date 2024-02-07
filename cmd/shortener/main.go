@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
+	_ "github.com/gorilla/mux"
 	"net/http"
 )
 
@@ -31,11 +33,12 @@ func handleRedirect(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc(`/{id}`, handleRedirect)
-	mux.HandleFunc(`/`, handleURLShortening)
+	r := mux.NewRouter()
 
-	err := http.ListenAndServe(`:8080`, mux)
+	r.HandleFunc("/", handleURLShortening)
+	r.HandleFunc("/{variable}", handleRedirect)
+
+	err := http.ListenAndServe(`:8080`, r)
 	if err != nil {
 		panic(err)
 	}
