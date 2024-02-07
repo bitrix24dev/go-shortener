@@ -36,7 +36,7 @@ func handleURLShortening(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusCreated)
-	_, err = fmt.Fprintf(w, shortenedURL)
+	_, err = fmt.Fprint(w, shortenedURL)
 	if err != nil {
 		return
 	}
