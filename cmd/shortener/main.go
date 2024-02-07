@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	_ "github.com/gorilla/mux"
 	"net/http"
 )
+
+var urlMap = make(map[string]string) // Карта для хранения сокращенных URL
 
 func handleURLShortening(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -13,7 +14,13 @@ func handleURLShortening(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shortenedURL := "http://localhost:8080/EwHXdJfB"
+	url := r.FormValue("url")
+
+	// Генерация произвольной комбинации символов (можно использовать более сложный алгоритм)
+	shortenedURL := "http://localhost:8080/" + generateRandomString(8)
+
+	// Добавление записи в карту
+	urlMap[shortenedURL] = url
 
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusCreated)
@@ -26,20 +33,31 @@ func handleRedirect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	originalURL := "https://practicum.yandex.ru/"
+	vars := mux.Vars(r)
+	shortenedURL := vars["variable"]
+
+	// Получение оригинального URL из карты
+	originalURL, ok := urlMap["http://localhost:8080/"+shortenedURL]
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
 
 	w.Header().Set("Location", originalURL)
 	w.WriteHeader(http.StatusTemporaryRedirect)
 }
 
+func generateRandomString(length int) string {
+	// Здесь может быть ваш алгоритм генерации случайной строки
+	return "abcdefg"
+}
+
 func main() {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/", handleURLShortening)
+	r.HandleFunc("/", handleURLShortening).Methods(http.MethodPost)
 	r.HandleFunc("/{variable}", handleRedirect)
 
-	err := http.ListenAndServe(`:8080`, r)
-	if err != nil {
-		panic(err)
-	}
+	fmt.Println("Server is running on http://localhost:8080")
+	http.ListenAndServe(":8080", r)
 }
