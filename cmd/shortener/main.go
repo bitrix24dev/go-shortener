@@ -3,10 +3,13 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"math/rand"
 	"net/http"
 )
 
 var urlMap = make(map[string]string) // Карта для хранения сокращенных URL
+
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 func handleURLShortening(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -48,8 +51,13 @@ func handleRedirect(w http.ResponseWriter, r *http.Request) {
 }
 
 func generateRandomString(length int) string {
-	// Здесь может быть ваш алгоритм генерации случайной строки
-	return "abcdefg"
+
+	result := make([]byte, length)
+	for i := range result {
+		result[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(result)
+
 }
 
 func main() {
