@@ -6,9 +6,10 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"net/url"
 )
 
-var urlMap = make(map[string]string) // Карта для хранения сокращенных URL
+var urlMap = make(map[string]string)
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
@@ -25,13 +26,8 @@ func handleURLShortening(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Вывод содержимого тела запроса в консоль
-	// fmt.Println("Request body:", string(body))
-
-	// Генерация произвольной комбинации символов (можно использовать более сложный алгоритм)
 	shortenedURL := "http://localhost:8080/" + generateRandomString(8)
 
-	// Добавление записи в карту
 	urlMap[shortenedURL] = string(body)
 
 	w.Header().Set("Content-Type", "text/plain")
@@ -49,11 +45,19 @@ func handleRedirect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vars := mux.Vars(r)
-	shortenedURL := vars["variable"]
+	/*
+		vars := mux.Vars(r)
+		shortenedURL := vars["variable"]
+	*/
+	// Парсим URL
+	parsedURL, err := url.Parse(r.URL.String())
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
 
 	// Получение оригинального URL из карты
-	originalURL, ok := urlMap["http://localhost:8080/"+shortenedURL]
+	originalURL, ok := urlMap["http://localhost:8080"+parsedURL.Path]
 	if !ok {
 		http.NotFound(w, r)
 		return
