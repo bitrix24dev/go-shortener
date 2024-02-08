@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/bitrix24dev/go-shortener/cmd/config"
 	"github.com/gorilla/mux"
 	"io"
 	"math/rand"
@@ -26,7 +27,7 @@ func handleURLShortening(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shortenedURL := "http://localhost:8080/" + generateRandomString(8)
+	shortenedURL := *config.ShortenerBasePath + "/" + generateRandomString(8)
 
 	urlMap[shortenedURL] = string(body)
 
@@ -57,7 +58,7 @@ func handleRedirect(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Получение оригинального URL из карты
-	originalURL, ok := urlMap["http://localhost:8080"+parsedURL.Path]
+	originalURL, ok := urlMap[*config.ShortenerBasePath+parsedURL.Path]
 	if !ok {
 		http.NotFound(w, r)
 		return
@@ -78,13 +79,14 @@ func generateRandomString(length int) string {
 }
 
 func main() {
+	config.InitConfig()
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", handleURLShortening).Methods(http.MethodPost)
 	r.HandleFunc("/{variable}", handleRedirect)
 
-	fmt.Println("Server is running on http://localhost:8080")
-	err := http.ListenAndServe(":8080", r)
+	fmt.Println("Server is running on " + *config.ServerAddrPath)
+	err := http.ListenAndServe(*config.ServerAddrPath, r)
 	if err != nil {
 		return
 	}

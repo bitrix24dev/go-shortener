@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"github.com/bitrix24dev/go-shortener/cmd/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
@@ -51,7 +52,7 @@ func TestHandleRedirect(t *testing.T) {
 	key := generateRandomString(8)
 
 	// Добавляем запись в карту urlMap
-	urlMap["http://localhost:8080/"+key] = "https://practicum.yandex.ru/"
+	urlMap[*config.ShortenerBasePath+"/"+key] = "https://practicum.yandex.ru/"
 
 	// Создаем фейковый запрос с переменной в URL
 	req, err := http.NewRequest("GET", "/"+key, nil)
