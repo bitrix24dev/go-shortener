@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-// ищем ключ по значению в MAP
+// Ищем ключ по значению в MAP
 func getKeyByValue(m map[string]string, value string) (string, bool) {
 	for key, val := range m {
 		if val == value {
@@ -42,7 +42,7 @@ func TestHandleURLShortening(t *testing.T) {
 	require.NoError(t, err)
 
 	// Проверяем тело ответа
-	expectedBody, ok := getKeyByValue(urlMap, url)
+	expectedBody, ok := getKeyByValue(urlMap.v, url)
 	assert.Equal(t, ok, true)
 	assert.Equal(t, expectedBody, string(respBody))
 }
@@ -52,7 +52,7 @@ func TestHandleRedirect(t *testing.T) {
 	key := generateRandomString(8)
 
 	// Добавляем запись в карту urlMap
-	urlMap[*config.ShortenerBasePath+"/"+key] = "https://practicum.yandex.ru/"
+	urlMap.v[*config.ShortenerBasePath+"/"+key] = "https://practicum.yandex.ru/"
 
 	// Создаем фейковый запрос с переменной в URL
 	req, err := http.NewRequest("GET", "/"+key, nil)
