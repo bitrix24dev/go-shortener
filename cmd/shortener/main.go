@@ -12,12 +12,12 @@ import (
 	"sync"
 )
 
-type SafeUrlMap struct {
+type SafeURLMap struct {
 	mu sync.Mutex
 	v  map[string]string
 }
 
-var urlMap = SafeUrlMap{v: make(map[string]string)}
+var urlMap = SafeURLMap{v: make(map[string]string)}
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
